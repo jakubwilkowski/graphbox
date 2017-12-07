@@ -1,0 +1,23 @@
+version: '3.2'
+
+services:
+  db:
+    container_name: graphbox-db
+    image: postgres:10
+    volumes:
+      - ./data/postgresql:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+    restart: always
+  neo:
+    container_name: graphbox-neo
+    image: neo4j:3.3
+    volumes:
+      - ./data:/data
+    ports:
+      - "7687:7687"
+      - "7474:7474"
+    restart: always
