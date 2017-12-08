@@ -20,12 +20,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '_h)fjf5n8+wpym=j*^*xsp7gklyx8hu$!r-r(5jvj!eq5(lw!c'
+SECRET_KEY = os.environ.get('SECRET_KEY', '_h)fjf5n8+wpym=j*^*xsp7gklyx8hu$!r-r(5jvj!eq5(lw!c')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', False)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 
 # Application definition
@@ -79,8 +79,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'USER': 'postgres',
-        'HOST': 'localhost',
-        'PORT': 5434,
+        'HOST': 'db',
+        'PORT': 5432,
     }
 }
 
@@ -120,13 +120,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATIC_URL = '/static/'
 
 UNWANTED_REPO_NAMES = ['django-storages-old']
 
 SHELL_PLUS = "ipython"
 
-GITHUB_USER =
-GITHUB_PASS =
-NEO4J_USER =
-NEO4J_PASS =
+GITHUB_USER = os.environ.get('GITHUB_USER', '')
+GITHUB_PASS = os.environ.get('GITHUB_PASS', '')
+
+NEO4J_USER = os.environ.get('NEO4J_USER', '')
+NEO4J_PASS = os.environ.get('NEO4J_PASS', '')

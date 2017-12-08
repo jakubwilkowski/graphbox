@@ -21,3 +21,15 @@ services:
       - "7687:7687"
       - "7474:7474"
     restart: always
+  web:
+    container_name: graphbox-web
+    build: .
+    volumes:
+      - .:/app
+      - ./static:/app/static
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db
+      - neo
+    restart: on-failure
