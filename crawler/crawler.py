@@ -1,20 +1,18 @@
 import pytz
-from github import Github
+from github import Github, GithubException
 from py2neo import Graph, authenticate, Node, Relationship
 
-from core.models import Repository, Developer, Language
+from core.models import Repository, Developer, Language, Module, ModuleVersion
 from graphbox.settings import UNWANTED_REPO_NAMES, NEO4J_PASS, NEO4J_USER, GITHUB_USER, GITHUB_PASS
 
-g = Github(GITHUB_USER, GITHUB_PASS)
-
-authenticate('localhost:7474', NEO4J_USER, NEO4J_PASS)
-graph = Graph("http://localhost:7474/")
-
+# authenticate('localhost:7474', NEO4J_USER, NEO4J_PASS)
+# graph = Graph("http://localhost:7474/")
 
 class GitCrawler(object):
 
     @staticmethod
     def populate_repos(org_name='10clouds'):
+        g = Github(GITHUB_USER, GITHUB_PASS)
         organization = g.get_organization(org_name)
         for repo in organization.get_repos():
             if not repo.private and not repo.fork and repo.name not in UNWANTED_REPO_NAMES:
@@ -24,6 +22,7 @@ class GitCrawler(object):
 
                 GitCrawler.populate_developers(current_repo, repo)
                 GitCrawler.populate_languages(current_repo, repo)
+                GitCrawler.populate_modules(current_repo, repo)
 
 
     @staticmethod
@@ -43,6 +42,22 @@ class GitCrawler(object):
             current_lang, _ = Language.objects.update_or_create(name=lang)
 
             current_repo.languages.add(current_lang)
+
+    @staticmethod
+    def populate_modules(current_repo, repo):
+        try:
+            req_file = repo.get_contents('requirements.txt')
+            deps = req_file.decoded_content.decode('utf-8').strip().split('\n')
+            print(current_repo.name)
+            print(deps)
+            if deps:
+                python = Language.objects.get(name='Python')
+                for module in list(map(lambda x: x.split('=='), deps)):
+                    current_module = Module.objects.update_or_create(name=module[0], language=python)
+                    if len(module) > 1:
+                        ModuleVersion.objects.create(module=current_module, repository=current_repo, version=module[1])
+        except GithubException:
+            pass
 
     @staticmethod
     def populate_graph():

@@ -11,7 +11,7 @@ services:
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
-    restart: always
+    restart: on-failure
   neo:
     container_name: graphbox-neo
     image: neo4j:3.3
@@ -20,7 +20,7 @@ services:
     ports:
       - "7687:7687"
       - "7474:7474"
-    restart: always
+    restart: on-failure
   web:
     container_name: graphbox-web
     build: .
@@ -29,6 +29,8 @@ services:
       - ./static:/app/static
     ports:
       - "8001:8000"
+    env_file:
+      - .env
     depends_on:
       - db
       - neo
